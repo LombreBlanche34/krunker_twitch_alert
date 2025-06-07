@@ -74,16 +74,17 @@ def log_message(conn, sender, host, message):
     ''', (sender, host, message))
     conn.commit()
 
-def send_discord_alert(sender, host, message):
+def send_discord_alert(sender, host, message, keyword):
     """Send an alert to Discord via webhook."""
     print(f"{COLOR_BLUE}Sending alert to Discord for message: {message}{COLOR_RESET}")
     embed = {
         "title": "New message detected",
         "color": 0x3498db,
         "fields": [
-            {"name": "Sent by", "value": sender, "inline": True},
+            {"name": "Sent by", "value": sender, "inline": False},
+            {"name": "Keyword", "value": keyword, "inline": False},
             {"name": "Message", "value": message, "inline": False},
-            {"name": "Stream link", "value": f"[Watch {host}](https://www.twitch.tv/{host})", "inline": True}
+            {"name": "Stream link", "value": f"[Watch {host}](https://www.twitch.tv/{host})", "inline": False}
         ],
     }
     payload = {
@@ -99,7 +100,7 @@ def check_alerts_and_notify(conn, sender, host, message):
     for keyword in keywords:
         if keyword.lower() in message.lower():
             print(f"{COLOR_PURPLE}Alert keyword '{keyword}' detected in message: {message}{COLOR_RESET}")
-            send_discord_alert(sender, host, message)
+            send_discord_alert(sender, host, message, keyword)
 
 async def listen_to_chat(streamer_name, conn):
     uri = "wss://irc-ws.chat.twitch.tv:443"
