@@ -55,3 +55,6 @@ DATABASE=chat.db
 py bot.py
 py app.py
 ```
+
+![panel](https://github.com/LombreBlanche34/krunker_twitch_alert/blob/main/img/panel.png)
+![console](https://github.com/LombreBlanche34/krunker_twitch_alert/blob/main/img/console.png)
