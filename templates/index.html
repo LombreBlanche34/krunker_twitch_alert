@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Krunker Twitch Scraper</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1 {
+            color: #444;
+            text-align: center;
+        }
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+        form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        input[type="text"], select, button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: white;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .info {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+        }
+        .chart-container {
+            width: 60%;
+            height: 300px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <a href="/">Home</a>
+    <a href="/alerts">Alerts</a>
+    <h1>Krunker Twitch Scraper</h1>
+
+    <form action="/search" method="get">
+        <input type="text" name="query" placeholder="Search...">
+        <select name="search_by">
+            <option value="message">Message</option>
+            <option value="host">Host</option>
+            <option value="sender">Sender</option>
+            <option value="date">Date</option>
+        </select>
+        <button type="submit">Search</button>
+    </form>
+
+    <div class="info">
+        Total number of messages: {{ messages | length }}
+    </div>
+
+    {% if chart_data %}
+    <div class="chart-container">
+        <canvas id="messagesChart"></canvas>
+    </div>
+    <script>
+        var ctx = document.getElementById('messagesChart').getContext('2d');
+        var chartData = JSON.parse('{{ chart_data | safe }}');
+        console.log(chartData);
+
+        if (chartData.length > 0) {
+            var labels = chartData.map(item => item[0]);
+            var data = chartData.map(item => item[1]);
+
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of messages per host',
+                        data: data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        } else {
+            console.log("No data available for the chart.");
+        }
+    </script>
+    {% endif %}
+
+    <h2>All Messages</h2>
+    <ul>
+        {% for message in messages %}
+        <li>
+            <a href="/search?query={{ message[4] }}&search_by=date">{{ message[4] }}</a>
+            <a href="/search?query={{ message[2] }}&search_by=host">[{{ message[2] }}]</a> <a href="https://twitch.tv/{{ message[2] }}" target="_blank">></a> |
+            <a href="/search?query={{ message[1] }}&search_by=sender">{{ message[1] }}</a> :
+            <a href="/search?query={{ message[3] }}&search_by=message">{{ message[3] }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
